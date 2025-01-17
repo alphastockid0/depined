@@ -29,17 +29,20 @@ const main = async () => {
                     const { email, verified, current_tier, points_balance } = userData.data
                     log.info(`Account ${index + 1} info:`, { email, verified, current_tier, points_balance });
                 }
+                while (true) {
+                    async () => {
+                        const connectRes = await utils.connect(token, proxy);
+                        log.info(`Ping account ${index + 1}:`, connectRes || { message: 'unknown error' });
 
-                setInterval(async () => {
-                    const connectRes = await utils.connect(token, proxy);
-                    log.info(`Ping account ${index + 1}:`, connectRes || { message: 'unknown error' });
+                        const result = await utils.getEarnings(token, proxy);
+                        log.info(`Earnings account ${index + 1}:`, result?.data || { message: 'unknown error' });
 
-                    const result = await utils.getEarnings(token, proxy);
-                    log.info(`Earnings account ${index + 1}:`, result?.data || { message: 'unknown error' });
+                    };
                     startCountdown(10);
-                }, 1000 * 10); // Run every 30 seconds
+                }
+                // setInterval(, 1000 * 10); // Run every 30 seconds
 
-                              
+
 
             } catch (error) {
                 log.error(`Error processing account ${index}: ${error.message}`);
