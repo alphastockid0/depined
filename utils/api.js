@@ -217,7 +217,7 @@ export async function logWidgetStatus(token, proxy) {
     const agent = newAgent(proxy);
     try {
         const payload = { connected: true };
-        const response = await axios.post(
+        const response = await axios.get(
             'https://api.depined.org/api/user/widget-status',
             payload,
             {
