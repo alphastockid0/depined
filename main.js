@@ -29,12 +29,24 @@ const main = async () => {
                     log.info(`Account ${index + 1} info:`, { email, verified, current_tier, points_balance });
                 }
 
+                // Ping setiap 5 detik
                 setInterval(async () => {
-                    const connectRes = await utils.connect(token, proxy);
-                    log.info(`Ping result for account ${index + 1}:`, connectRes || { message: 'unknown error' });
+                    try {
+                        const connectRes = await utils.connect(token, proxy);
+                        log.info(`Ping account ${index + 1}:`, connectRes || { message: 'unknown error' });
+                    } catch (error) {
+                        log.error(`Ping error for account ${index + 1}:`, error.message || error);
+                    }
+                }, 1000 * 5); // Run every 5 seconds
 
-                    const result = await utils.getEarnings(token, proxy);
-                    log.info(`Earnings result for account ${index + 1}:`, result?.data || { message: 'unknown error' });
+                // Earning setiap 30 detik
+                setInterval(async () => {
+                    try {
+                        const result = await utils.getEarnings(token, proxy);
+                        log.info(`Earnings account ${index + 1}:`, result?.data || { message: 'unknown error' });
+                    } catch (error) {
+                        log.error(`Earnings error for account ${index + 1}:`, error.message || error);
+                    }
                 }, 1000 * 30); // Run every 30 seconds
 
             } catch (error) {
