@@ -36,7 +36,6 @@ const main = async () => {
 
                     const result = await utils.getEarnings(token, proxy);
                     log.info(`Earnings account ${index + 1}:`, result?.data || { message: 'unknown error' });
-                    startCountdown(10);
                 }, 1000 * 30); // Run every 30 seconds
 
                               
