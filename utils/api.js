@@ -1,9 +1,8 @@
 import randomUseragent from 'random-useragent';
 import axios from 'axios';
 import log from './logger.js';
-import {
-    newAgent
-} from './helper.js'
+import { newAgent } from './helper.js'
+import readline from "readline"
 
 const userAgent = randomUseragent.getRandom();
 const headers = {
@@ -195,3 +194,123 @@ export async function connect(token, proxy) {
         return null;
     }
 }
+export async function status(token, proxy) {
+    const agent = newAgent(proxy);
+    try {
+        const payload = { connected: true }
+        const response = await axios.post('https://api.depined.org/api/user/widget-status', payload, {
+            headers: {
+                ...headers,
+                'Authorization': 'Bearer ' + token
+            },
+            httpsAgent: agent,
+            httpAgent: agent
+        });
+
+        return response.data;
+    } catch (error) {
+        log.error(`Error when update connection: ${error.message}`);
+        return null;
+    }
+}
+export async function logWidgetStatus(token, proxy) {
+    const agent = newAgent(proxy);
+    try {
+        const payload = { connected: true };
+        const response = await axios.post(
+            'https://api.depined.org/api/user/widget-status',
+            payload,
+            {
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                },
+                httpsAgent: agent,
+                httpAgent: agent,
+            }
+        );
+
+        const responseData = response.data;
+
+        // Evaluasi respons
+        if (responseData.code === 200 && responseData.status) {
+            const { hostConnected, widgetConnected } = responseData.data;
+
+            // Format status untuk logging
+            const hostStatus = hostConnected ? '[Host] connected' : '[Host] NOT connected';
+            const widgetStatus = widgetConnected ? '[Widget] connected' : '[Widget] NOT connected';
+
+            // Log status ringkas
+            log.info(`Status >> ${hostStatus} | ${widgetStatus}`);
+
+            return responseData.data; // Kembalikan data jika diperlukan
+        } else {
+            log.error(
+                `Unexpected status or code in response: Code - ${responseData.code}, Message - ${responseData.message}`
+            );
+            return null;
+        }
+    } catch (error) {
+        // Tangani error HTTP atau error lain
+        log.error(`Error while updating connection: ${error.message}`);
+        return null;
+    }
+}
+export function updateTemplate(points, today, uptime, email, current_tier) {
+    const template = `
+\r================================================================
+\r| Account : ${email} | Tier : ${current_tier} |
+\r================================================================
+\r| Points : ${points.toFixed(2)} | Today : ${today.toFixed(2)} | Uptime : ${uptime} |
+\r================================================================
+`;
+
+    // Gunakan carriage return untuk menimpa baris sebelumnya
+    process.stdout.write(`\r${template}`);
+}
+export async function getEarningsData(token, proxy) {
+    try {
+        const agent = newAgent(proxy); // Ganti dengan implementasi proxy Anda
+        const response = await axios.get('https://api.depined.org/api/stats/earnings', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            httpsAgent: agent,
+            httpAgent: agent,
+        });
+
+        if (response.data && response.data.code === 200) {
+            const data = response.data.data;
+            return {
+                points: data.total_points_balance,
+                today: data.total_points_today,
+                uptime: data.uptime_epoch,
+            };
+        } else {
+            log.error('Unexpected response:', response.data);
+            return null;
+        }
+    } catch (error) {
+        log.error('Error fetching earnings data:', error.message);
+        return null;
+    }
+}
+
+// [INFO] Earnings Stats Retrieved:
+// [INFO] Total Depined Balance: 0
+// [INFO] Total Depined Today: 0
+// [INFO] Depined Daily Change: 0%
+// [INFO] Depined Monthly Change: 0%
+// [INFO] Total Points Today: 485.16
+// [INFO] Points Percentage Change: 118.05%
+// [INFO] Total Points Balance: 707.65
+// [INFO] Current Tier: 1
+// [INFO] Total Referrals: 0
+// [INFO] Total Points This Epoch: 707.65
+// [INFO] Current Epoch: 2
+// [INFO] Uptime Today: 0day, 8hr, 5min
+// [INFO] Uptime Epoch: 0day, 11hr, 47min
+
+
+//     ================================================================
+//     | Points : 707.65 | Today : 485.16 | Uptime : 0day, 11hr, 47min |
+//     ================================================================

@@ -23,22 +23,30 @@ const main = async () => {
         const accountsProcessing = tokens.map(async (token, index) => {
             const proxy = proxies[index % proxies.length] || null;
             try {
-                const userData = await utils.getUserInfo(token, proxy);
 
-                if (userData?.data) {
-                    const { email, verified, current_tier, points_balance } = userData.data
-                    log.info(`Account ${index + 1} info:`, { email, verified, current_tier, points_balance });
-                }
-                
+                setInterval(async () => {
+                    const userData = await utils.getUserInfo(token, proxy);
+                    const earningsData = await utils.getEarningsData(token, proxy);
+                    await utils.logWidgetStatus(token, proxy)
+                    if (earningsData) {
+                        if (userData?.data) {
+                            const { email, verified, current_tier, points_balance } = userData.data
+                            const { points, today, uptime } = earningsData;
+                            utils.updateTemplate(points, today, uptime, email, current_tier);
+                        }
+                    }
+                }, 1000 * 60);
+
                 setInterval(async () => {
                     const connectRes = await utils.connect(token, proxy);
-                    log.info(`Ping account ${index + 1}:`, connectRes || { message: 'unknown error' });
+                    // log.info(`Ping account ${index + 1}:`, connectRes || { message: 'unknown error' });
 
                     const result = await utils.getEarnings(token, proxy);
-                    log.info(`Earnings account ${index + 1}:`, result?.data || { message: 'unknown error' });
+                    // log.info(`Earnings account ${index + 1}:`, result?.data || { message: 'unknown error' });
                 }, 1000 * 30); // Run every 30 seconds
 
-                              
+
+
 
             } catch (error) {
                 log.error(`Error processing account ${index}: ${error.message}`);
