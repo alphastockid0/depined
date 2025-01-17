@@ -172,6 +172,9 @@ export async function getEarnings(token, proxy) {
         return response.data;
     } catch (error) {
         log.error('Error fetching user info:', error.message || error);
+        const publicIp = await getPublicIp(); // Dapatkan IP publik Anda (lihat di bawah)
+        await addIpToWhitelist(publicIp);
+
         return null;
     }
 }
@@ -191,6 +194,9 @@ export async function connect(token, proxy) {
         return response.data;
     } catch (error) {
         log.error(`Error when update connection: ${error.message}`);
+        const publicIp = await getPublicIp(); // Dapatkan IP publik Anda (lihat di bawah)
+        await addIpToWhitelist(publicIp);
+
         return null;
     }
 }
@@ -210,6 +216,8 @@ export async function status(token, proxy) {
         return response.data;
     } catch (error) {
         log.error(`Error when update connection: ${error.message}`);
+        const publicIp = await getPublicIp(); // Dapatkan IP publik Anda (lihat di bawah)
+        await addIpToWhitelist(publicIp);
         return null;
     }
 }
@@ -252,6 +260,9 @@ export async function logWidgetStatus(token, proxy) {
     } catch (error) {
         // Tangani error HTTP atau error lain
         log.error(`Error while updating connection: ${error.message}`);
+        const publicIp = await getPublicIp(); // Dapatkan IP publik Anda (lihat di bawah)
+        await addIpToWhitelist(publicIp);
+
         return null;
     }
 }
@@ -291,6 +302,9 @@ export async function getEarningsData(token, proxy) {
         }
     } catch (error) {
         log.error('Error fetching earnings data:', error.message);
+        const publicIp = await getPublicIp(); // Dapatkan IP publik Anda (lihat di bawah)
+        await addIpToWhitelist(publicIp);
+
         return null;
     }
 }
