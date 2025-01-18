@@ -27,12 +27,13 @@ const main = async () => {
                 setInterval(async () => {
                     const userData = await utils.getUserInfo(token, proxy);
                     const earningsData = await utils.getEarningsData(token, proxy);
-                    await utils.logWidgetStatus(token, proxy)
+                    const widget = await utils.logWidgetStatus(token, proxy);
+                    
                     if (earningsData) {
                         if (userData?.data) {
                             const { email, verified, current_tier, points_balance } = userData.data
-                            const { points, today, uptime } = earningsData;
-                            utils.updateTemplate(points, today, uptime, email, current_tier);
+                            const { points, today, uptime, epoch } = earningsData;
+                            utils.updateTemplate(points, today, uptime, email, current_tier,epoch,proxy,widget);
                         }
                     }
                 }, 1000 * 60);

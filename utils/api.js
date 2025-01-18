@@ -2,7 +2,8 @@ import randomUseragent from 'random-useragent';
 import axios from 'axios';
 import log from './logger.js';
 import { newAgent } from './helper.js'
-import readline from "readline"
+import chalk from 'chalk';
+
 
 const userAgent = randomUseragent.getRandom();
 const headers = {
@@ -222,18 +223,22 @@ export async function status(token, proxy) {
     }
 }
 export async function logWidgetStatus(token, proxy) {
-    const agent = newAgent(proxy);
+    const agent = newAgent(proxy); // Membuat agent proxy jika diperlukan
+
     try {
-        const payload = { connected: true };
         const response = await axios.get(
             'https://api.depined.org/api/user/widget-status',
-            payload,
             {
                 headers: {
-                    'Authorization': 'Bearer ' + token,
+                    'Authorization': `Bearer ${token}`, // Menambahkan header Authorization dengan Bearer Token
+                    'Accept': 'application/json', // Menambahkan header Accept
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                    'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+                    'Origin': 'https://app.depined.org',
+                    'Referer': 'https://app.depined.org/',
                 },
-                httpsAgent: agent,
-                httpAgent: agent,
+                httpsAgent: agent, // Menggunakan agent https jika menggunakan proxy atau pengaturan SSL
+                httpAgent: agent, // Menggunakan agent http jika diperlukan
             }
         );
 
@@ -244,8 +249,8 @@ export async function logWidgetStatus(token, proxy) {
             const { hostConnected, widgetConnected } = responseData.data;
 
             // Format status untuk logging
-            const hostStatus = hostConnected ? '[Host] connected' : '[Host] NOT connected';
-            const widgetStatus = widgetConnected ? '[Widget] connected' : '[Widget] NOT connected';
+            const hostStatus = hostConnected ? `${chalk.green('[Host]')} ${chalk.bgGreen('connected')}` : `${chalk.red('[Host]')} ${chalk.red('NOT connected')}`;
+            const widgetStatus = widgetConnected ? `${chalk.green('[Widget]')} ${chalk.bgGreen('connected')}` : `${chalk.red('[Widget]')} ${chalk.red('NOT connected')}`;
 
             // Log status ringkas
             log.info(`Status >> ${hostStatus} | ${widgetStatus}`);
@@ -259,25 +264,27 @@ export async function logWidgetStatus(token, proxy) {
         }
     } catch (error) {
         // Tangani error HTTP atau error lain
-        log.error(`Error while updating connection: ${error.message}`);
-        const publicIp = await getPublicIp(); // Dapatkan IP publik Anda (lihat di bawah)
-        await addIpToWhitelist(publicIp);
-
+        log.error(`[Widget Status] Error: ${error.message}`);
         return null;
     }
 }
-export function updateTemplate(points, today, uptime, email, current_tier) {
+
+export function updateTemplate(points, today, uptime, email, current_tier, current_epoch,proxy,statusData) {
+    const { hostConnected, widgetConnected } = statusData;
+    
     const template = `
-\r================================================================
-\r| Account : ${email} | Tier : ${current_tier} |
-\r================================================================
-\r| Points : ${points.toFixed(2)} | Today : ${today.toFixed(2)} | Uptime : ${uptime} |
-\r================================================================
+Proxy : ${chalk.green(proxy)} | Widget : ${widgetConnected ? `${chalk.green('connected')}` : `${chalk.red('Not connected')}`} | Host : ${hostConnected ? `${chalk.green('connected')}` : `${chalk.red('Not connected')}`}
+${chalk.cyanBright("================================================================")}
+${chalk.cyanBright(`| Account : ${chalk.green(email)} | Tier : ${current_tier} | Epoch : ${current_epoch}`)}
+${chalk.cyanBright("================================================================")}
+${chalk.cyanBright(`| Points : ${points.toFixed(2)} | Today : ${today.toFixed(2)} | Uptime : ${uptime} |`)}
+${chalk.cyanBright("================================================================")} 
 `;
 
     // Gunakan carriage return untuk menimpa baris sebelumnya
     process.stdout.write(`\r${template}`);
 }
+
 export async function getEarningsData(token, proxy) {
     try {
         const agent = newAgent(proxy); // Ganti dengan implementasi proxy Anda
@@ -295,6 +302,7 @@ export async function getEarningsData(token, proxy) {
                 points: data.total_points_balance,
                 today: data.total_points_today,
                 uptime: data.uptime_epoch,
+                epoch: data.current_epoch
             };
         } else {
             log.error('Unexpected response:', response.data);
