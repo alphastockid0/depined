@@ -252,9 +252,6 @@ export async function logWidgetStatus(token, proxy) {
             const hostStatus = hostConnected ? `${chalk.green('[Host]')} ${chalk.bgGreen('connected')}` : `${chalk.red('[Host]')} ${chalk.red('NOT connected')}`;
             const widgetStatus = widgetConnected ? `${chalk.green('[Widget]')} ${chalk.bgGreen('connected')}` : `${chalk.red('[Widget]')} ${chalk.red('NOT connected')}`;
 
-            // Log status ringkas
-            log.info(`Status >> ${hostStatus} | ${widgetStatus}`);
-
             return responseData.data; // Kembalikan data jika diperlukan
         } else {
             log.error(
