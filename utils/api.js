@@ -266,19 +266,27 @@ export async function logWidgetStatus(token, proxy) {
     }
 }
 
-export function updateTemplate(points, today, uptime, email, current_tier, current_epoch,proxy,statusData) {
-    const { hostConnected, widgetConnected } = statusData;
-    
+export function updateTemplate(points, today, uptime, email, current_tier, current_epoch, proxy, statusData) {
+    let hostConnected = false;
+    let widgetConnected = false;
+
+    // Jika `statusData` tidak null, ekstrak properti
+    if (statusData) {
+        ({ hostConnected, widgetConnected } = statusData);
+    }
+
     const template = `
-Proxy : ${chalk.green(proxy)} | Widget : ${widgetConnected ? `${chalk.green('connected')}` : `${chalk.red('Not connected')}`} | Host : ${hostConnected ? `${chalk.green('connected')}` : `${chalk.red('Not connected')}`}
+Proxy   : ${chalk.green(proxy)} 
+Widget  : ${widgetConnected ? chalk.green('Connected') : chalk.red('Not connected')}
+Host    : ${hostConnected ? chalk.green('Connected') : chalk.red('Not connected')}
 ${chalk.cyanBright("================================================================")}
-${chalk.cyanBright(`| Account : ${chalk.green(email)} | Tier : ${current_tier} | Epoch : ${current_epoch}`)}
+${chalk.cyanBright(`| Account : ${chalk.green(email)} | Tier : ${current_tier} | Epoch : ${current_epoch} |`)}
 ${chalk.cyanBright("================================================================")}
 ${chalk.cyanBright(`| Points : ${points.toFixed(2)} | Today : ${today.toFixed(2)} | Uptime : ${uptime} |`)}
-${chalk.cyanBright("================================================================")} 
+${chalk.cyanBright("================================================================")}
 `;
 
-    // Gunakan carriage return untuk menimpa baris sebelumnya
+    // Gunakan carriage return (\r) untuk menimpa baris sebelumnya
     process.stdout.write(`\r${template}`);
 }
 

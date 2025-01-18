@@ -36,14 +36,11 @@ const main = async () => {
                             utils.updateTemplate(points, today, uptime, email, current_tier,epoch,proxy,widget);
                         }
                     }
-                }, 1000 * 60);
+                }, 60000 * 2);
 
                 setInterval(async () => {
                     const connectRes = await utils.connect(token, proxy);
-                    // log.info(`Ping account ${index + 1}:`, connectRes || { message: 'unknown error' });
-
                     const result = await utils.getEarnings(token, proxy);
-                    // log.info(`Earnings account ${index + 1}:`, result?.data || { message: 'unknown error' });
                 }, 1000 * 30); // Run every 30 seconds
 
 
