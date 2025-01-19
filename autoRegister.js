@@ -15,7 +15,7 @@ const main = async () => {
     log.info(banner);
     log.info(`proccesing run auto register (CTRL + C to exit)`);
     await delay(3);
-    const tokens = await readFile("tokens.txt")
+    const tokens = await readFile("./config/tokens.txt")
     for (let i = 0; i < 5; i++) {
         for (const token of tokens) {
             const response = await getUserRef(token);
@@ -55,8 +55,8 @@ const main = async () => {
                         confirm = await confirmUserReff(token, reffCode);
                     }
 
-                    await saveToFile("accounts.txt", `${email}|${password}`)
-                    await saveToFile("tokens.txt", `${confirm.data.token}`)
+                    await saveToFile("./config/accounts.txt", `${email}|${password}`)
+                    await saveToFile("./config/tokens.txt", `${confirm.data.token}`)
 
                 } catch (err) {
                     log.error('Error creating account:', err.message);

@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node main.js",
     "autoreg": "node autoRegister.js",
-    "test": "node tes.js"
+    "test": "node test.js"
   },
   "dependencies": {
     "@cemalgnlts/mailjs": "^3.0.1",

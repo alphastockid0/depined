@@ -266,7 +266,8 @@ export async function logWidgetStatus(token, proxy) {
     }
 }
 
-export function updateTemplate(points, today, uptime, email, current_tier, current_epoch, proxy, statusData) {
+export function updateTemplate(points, today, uptime, email, current_tier, current_epoch, proxy, statusData,earn) {
+    // Default values
     let hostConnected = false;
     let widgetConnected = false;
 
@@ -275,18 +276,14 @@ export function updateTemplate(points, today, uptime, email, current_tier, curre
         ({ hostConnected, widgetConnected } = statusData);
     }
 
+    // Format template dengan data yang diterima
     const template = `
-Proxy   : ${chalk.green(proxy)} 
-Widget  : ${widgetConnected ? chalk.green('Connected') : chalk.red('Not connected')}
-Host    : ${hostConnected ? chalk.green('Connected') : chalk.red('Not connected')}
-${chalk.cyanBright("================================================================")}
-${chalk.cyanBright(`| Account : ${chalk.green(email)} | Tier : ${current_tier} | Epoch : ${current_epoch} |`)}
-${chalk.cyanBright("================================================================")}
-${chalk.cyanBright(`| Points : ${points.toFixed(2)} | Today : ${today.toFixed(2)} | Uptime : ${uptime} |`)}
-${chalk.cyanBright("================================================================")}
+${chalk.cyanBright(`=======================[ Account ${chalk.yellowBright(email)} ]=======================`)}
+${chalk.yellowBright(`[${proxy}]`)} ${widgetConnected ? chalk.greenBright('[Connected]') : chalk.red('[Not connected]')} ${chalk.magenta(`[ ${uptime} ]`)} ${chalk.yellowBright(`[ Epoch ${current_epoch} ]`)}
+Points: ${chalk.yellow(points.toFixed(2))} | Earn: ${chalk.green(earn.toFixed(2))} | Today: ${chalk.yellowBright(today.toFixed(2))} | Tier: ${chalk.yellowBright(current_tier)}
+${chalk.cyanBright("===============================================================================")}
 `;
-
-    // Gunakan carriage return (\r) untuk menimpa baris sebelumnya
+    
     process.stdout.write(`\r${template}`);
 }
 
