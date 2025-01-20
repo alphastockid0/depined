@@ -1,17 +1,17 @@
 import * as utils from './utils/api.js';
-import banner from './utils/banner.js';
 import log from './utils/logger.js';
 import { readFile, delay } from './utils/helper.js'
-import { startCountdown } from './utils/helper.js';
 
 
 
 const processAccount = async (token, proxy, index) => {
     let currentPoint = 0;
+    let earn = 0;
 
     try {
         setInterval(async () => {
             try {
+                console.clear();
                 const userData = await utils.getUserInfo(token, proxy);
                 const earningsData = await utils.getEarningsData(token, proxy);
                 const widget = await utils.logWidgetStatus(token, proxy);
@@ -20,11 +20,11 @@ const processAccount = async (token, proxy, index) => {
                     const { email, verified, current_tier } = userData.data;
                     const { points, today, uptime, epoch } = earningsData;
 
-                    const earn = points - currentPoint;
+                    currentPoint == points || currentPoint == 0 ? earn = 0 : earn = points - currentPoint;
                     currentPoint = points; // Update currentPoint untuk interval berikutnya
 
                     utils.updateTemplate(points, today, uptime, email, current_tier, epoch, proxy, widget, earn);
-                    
+
                 }
             } catch (error) {
                 log.error(`Error updating account ${index}: ${error.message}`);
@@ -45,7 +45,6 @@ const processAccount = async (token, proxy, index) => {
 };
 
 const main = async () => {
-    console.clear();
     await delay(3);
 
     const tokens = await readFile("./config/tokens.txt");
@@ -61,8 +60,7 @@ const main = async () => {
 
     log.info(`Starting Program for all accounts: ${tokens.length}`);
 
-    try {
-        console.clear();
+    try {        
         const accountsProcessing = tokens.map((token, index) => {
             const proxy = proxies[index % proxies.length] || null;
             return processAccount(token, proxy, index);
